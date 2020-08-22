@@ -3,6 +3,8 @@ import Navigation from "./components/navigation/Navigation";
 import Logo from "./components/logo/Logo";
 import ImageInput from "./components/image-input/ImageInput";
 import FaceRecognition from "./components/face-recognition/FaceRecognition";
+import Register from "./components/register/Register";
+import SignIn from "./components/sign-in/SignIn";
 import Clarifai, { COLOR_MODEL } from "clarifai";
 import "./App.css";
 
@@ -17,8 +19,18 @@ class App extends React.Component {
       input: "",
       imgUrl: "",
       box: {},
+      route: "signin",
+      isSignedIn: false,
     };
   }
+  onRouteChange = (route) => {
+    if (this.state.route === "signout") {
+      this.setState({ isSignedIn: false });
+    } else if (this.state.route === "home") {
+      this.setState({ isSignedIn: true });
+    }
+    this.setState({ route: route });
+  };
   calculateFaceLocation = (data) => {
     const clarifaiFace =
       data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -54,13 +66,24 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <Navigation />
-        <Logo />
-        <ImageInput
-          onInputChange={this.onInputChange}
-          onSubmit={this.onSubmit}
+        <Navigation
+          isSignedIn={this.state.isSignedIn}
+          onRouteChange={this.onRouteChange}
         />
-        <FaceRecognition box={this.state.box} imgUrl={this.state.imgUrl} />
+        {this.state.route === "home" ? (
+          <div>
+            <Logo />
+            <ImageInput
+              onInputChange={this.onInputChange}
+              onSubmit={this.onSubmit}
+            />
+            <FaceRecognition box={this.state.box} imgUrl={this.state.imgUrl} />
+          </div>
+        ) : this.state.route === "signin" ? (
+          <SignIn onRouteChange={this.onRouteChange} />
+        ) : (
+          <Register onRouteChange={this.onRouteChange} />
+        )}
       </div>
     );
   }
